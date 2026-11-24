@@ -137,7 +137,6 @@ class _LogoStartScreenState extends State<_LogoStartScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final Animation<double> _logoScale;
-  late final Animation<double> _hintOpacity;
 
   @override
   void initState() {
@@ -151,7 +150,6 @@ class _LogoStartScreenState extends State<_LogoStartScreen>
       curve: Curves.easeInOut,
     );
     _logoScale = Tween<double>(begin: 0.97, end: 1).animate(curve);
-    _hintOpacity = Tween<double>(begin: 0.62, end: 1).animate(curve);
   }
 
   @override
@@ -190,18 +188,6 @@ class _LogoStartScreenState extends State<_LogoStartScreen>
                             child: child,
                           ),
                           child: _StartupLogo(size: logoSize),
-                        ),
-                        const SizedBox(height: 18),
-                        FadeTransition(
-                          opacity: _hintOpacity,
-                          child: Text(
-                            'Tap the logo to continue',
-                            style: GoogleFonts.lato(
-                              color: AgriCartColors.darkGreen,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                         ),
                       ],
                     ),
@@ -353,17 +339,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final slide = _slides[_index];
-    return _PageScaffold(
+    return _CenteredStartLayout(
+      topActionAlignment: Alignment.centerRight,
+      topAction: TextButton(
+        onPressed: widget.onComplete,
+        child: const Text('Skip'),
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: widget.onComplete,
-              child: const Text('Skip'),
-            ),
-          ),
-          const SizedBox(height: 32),
           _OnboardingArtwork(index: _index, caption: slide.caption),
           const SizedBox(height: 28),
           Text(
@@ -422,6 +408,58 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CenteredStartLayout extends StatelessWidget {
+  const _CenteredStartLayout({
+    required this.topActionAlignment,
+    required this.topAction,
+    required this.child,
+  });
+
+  final AlignmentGeometry topActionAlignment;
+  final Widget topAction;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AgriCartColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Align(alignment: topActionAlignment, child: topAction),
+            ),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    primary: false,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 520),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: child,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -606,12 +644,14 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _PageScaffold(
+    return _CenteredStartLayout(
+      topActionAlignment: Alignment.centerLeft,
+      topAction: _BackButton(onPressed: widget.onBack),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _BackButton(onPressed: widget.onBack),
-          const SizedBox(height: 8),
           const _BrandMark(),
           const SizedBox(height: 18),
           Text(
